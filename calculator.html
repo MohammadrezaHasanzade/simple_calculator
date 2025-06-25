@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      body {
+        background: linear-gradient(45deg, #0000ff, #00ccff, #04fdb2, #03ff03);
+        width: 100%;
+        height: 100vh;
+      }
+      main {
+        width: 60%;
+        height: 80%;
+        margin: 2em auto;
+        border: 1px solid black;
+        border-radius: 1em;
+        overflow: hidden;
+      }
+      .monitor {
+        width: 100%;
+        height: 30%;
+        background-color: rgba(0, 0, 0, 0.7);
+        display: flex;
+        flex-direction: column;
+      }
+      .key {
+        background-color: #040442d0;
+        width: 100%;
+        height: 70%;
+        display: flex;
+        gap: 0.5em;
+      }
+      .resultMon,
+      .curMon {
+        width: 100%;
+        height: 50%;
+        color: whitesmoke;
+        text-align: center;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: xx-large;
+        font-weight: bold;
+      }
+      .num {
+        width: 60%;
+        height: 100%;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.2em;
+      }
+      .operator {
+        width: 40%;
+        height: 100%;
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.2em;
+      }
+      button {
+        font-size: xx-large;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="container">
+      <div class="monitor">
+        <div class="curMon"></div>
+        <div class="resultMon"></div>
+      </div>
+      <div class="key">
+        <div class="num">
+          <button class="numBtn">9</button><button class="numBtn">8</button>
+          <button class="numBtn">7</button><button class="numBtn">6</button>
+          <button class="numBtn">5</button><button class="numBtn">4</button>
+          <button class="numBtn">3</button><button class="numBtn">2</button>
+          <button class="numBtn">1</button><button class="numBtn">0</button>
+          <button class="dotBtn">.</button><button class="opBtn">C</button>
+        </div>
+        <div class="operator">
+          <button class="opBtn">%</button><button class="opBtn">÷</button>
+          <button class="opBtn">×</button><button class="opBtn">^</button>
+          <button class="opBtn">+</button><button class="opBtn">-</button>
+          <button class="opBtn">=</button><button class="opBtn">AC</button>
+        </div>
+      </div>
+    </main>
+    <script>
+      const buttons = document.querySelectorAll("button");
+      const curMon = document.querySelector(".curMon");
+      const resultMon = document.querySelector(".resultMon");
+      const operator = ["%", "÷", "×", "^", "+", "-"];
+
+      buttons.forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const lastChar = curMon.textContent.slice(-1);
+          let flag = false;
+          let firstPart = "",
+            lastPart = "",
+            theOpe = "";
+
+          const handelOperator = () => {
+            switch (theOpe) {
+              case "+":
+                return parseFloat(firstPart) + parseFloat(lastPart);
+                break;
+              case "-":
+                return parseFloat(firstPart) - parseFloat(lastPart);
+                break;
+              case "×":
+                return parseFloat(firstPart) * parseFloat(lastPart);
+                break;
+              case "÷":
+                return parseFloat(firstPart) / parseFloat(lastPart);
+                break;
+              case "^":
+                return parseFloat(firstPart) ** parseFloat(lastPart);
+                break;
+              case "%":
+                return parseFloat(firstPart) % parseFloat(lastPart);
+                break;
+            }
+          };
+
+          for (let i = 0; i < curMon.textContent.length; i++) {
+            if (operator.includes(curMon.textContent[i])) {
+              flag = true;
+              theOpe = curMon.textContent[i];
+              continue;
+            } else if (!flag) {
+              firstPart += curMon.textContent[i];
+            } else if (flag) {
+              lastPart += curMon.textContent[i];
+            }
+          }
+          // content is number
+          if (!isNaN(parseInt(btn.textContent))) {
+            curMon.textContent += btn.textContent;
+          }
+          // content is .
+          if (
+            btn.textContent === "." &&
+            curMon.textContent.length > 0 &&
+            curMon.textContent.indexOf(".") !== 0
+          ) {
+            if (
+              lastChar === "." ||
+              (firstPart.includes(".") && lastPart === "") ||
+              lastPart.includes(".") ||
+              operator.includes(lastChar)
+            )
+              return;
+            curMon.textContent += btn.textContent;
+          }
+          // btn balue is C
+          if (btn.textContent === "C") {
+            curMon.textContent = curMon.textContent.slice(0, -1);
+          }
+          // btn value is AC
+          if (btn.textContent === "AC") {
+            curMon.textContent = "";
+            resultMon.textContent = "";
+          }
+          // btn value is operator
+          if (
+            operator.includes(btn.textContent) &&
+            firstPart.length > 0 &&
+            resultMon.textContent.length == 0
+          ) {
+            if (operator.includes(lastChar)) return;
+            if (flag) {
+              curMon.textContent = handelOperator() + btn.textContent;
+            } else if (lastChar === ".") {
+              curMon.textContent = curMon.textContent + "0" + btn.textContent;
+            } else {
+              curMon.textContent += btn.textContent;
+            }
+          }
+          // btn value is =
+          if (btn.textContent === "=") {
+            if (operator.includes(lastChar)) return;
+            if (!flag) resultMon.textContent = curMon.textContent;
+            else resultMon.textContent = handelOperator();
+            curMon.textContent = "";
+          }
+        });
+      });
+    </script>
+  </body>
+</html>
